@@ -21,16 +21,3 @@ enocean.start().then(() => {
   // Failed to start to monitor telegrams
   console.error(error);
 });
-
-/*
-*{
-*  address: 'e2150002e87a',
-*  manufacturer: '03da',
-*  sequence: 158,
-*  type: 'button',
-*  data: { button: '', pressed: true },
-*  signature: '269d8bd1',
-*  authenticated: true,
-*  replayed: false
-*}
-**/
