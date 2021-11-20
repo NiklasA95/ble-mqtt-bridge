@@ -1,0 +1,17 @@
+{
+  "name": "ble-mqtt-bridge",
+  "version": "0.0.1",
+  "description": "Implementation that bridges bluetooth low energy sensor and actor data to mqqt to send to devices that are out of range for bluetooth low energy. ",
+  "main": "index.js",
+  "dependencies": {
+    "@abandonware/noble": "^1.9.2",
+    "mqtt": "^4.2.8",
+    "node-enocean-ble": "^0.0.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Niklas Amann",
+  "license": "ISC"
+}
