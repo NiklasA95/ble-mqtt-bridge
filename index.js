@@ -1,23 +1,54 @@
 const EnoceanBle = require("node-enocean-ble");
-const enocean = new EnoceanBle();
-
+const mqtt = require("mqtt");
 const secrets = require("./secrets");
 
+const enocean = new EnoceanBle();
 enocean.commission(secrets.comissioningDataString);
 
-// Set a callback for incoming telegrams
-enocean.ondata = (telegram) => {
-  if(telegram.address === secrets.rockerWallSwitchAddress && telegram.data.pressed) {
-    console.log("Toggle lamp")
-  }
-  console.log(telegram);
-};
+const bedroomLampStateTopic = "home/apartment/bedroom/bed_lamp/state";
+let mqttClient = null;
+let bedroomLampState = "Off";
 
-// Start to monitor telegrams
 enocean.start().then(() => {
-  // Successfully started to monitor telegrams
-  console.log("Waiting for telegrams...");
+  console.log("Successfully startet ble data monitoring!\nWaiting for telegrams...");
+  connectMqttClient()
 }).catch((error) => {
-  // Failed to start to monitor telegrams
   console.error(error);
 });
+
+enocean.ondata = (telegram) => {
+  if(telegram.address === secrets.rockerWallSwitchAddress && telegram.data.pressed) {
+    mqttClient.publish(
+      "home/apartment/bedroom/bed_lamp/cmd",
+      bedroomLampState === "Off" ? "On" : "Off"
+    );
+    console.log(telegram);
+  }
+};
+
+const connectMqttClient = () => {
+  mqttClient = mqtt.connect(
+    `mqtt://${secrets.mqttHost}`,
+    {
+      clientId: "ble-mqtt-bridge",
+      username: secrets.mqttUsername,
+      password: secrets.mqttPassword
+    }
+  );
+
+  mqttClient.on("connect", () => {
+    console.log("Successfully connected to MQTT broker!");
+    mqttClient.subscribe(bedroomLampStateTopic, (error) => {
+      if(!error) {
+        console.log("Subscribed to topic " + bedroomLampStateTopic);
+      }
+    });
+  });
+
+  mqttClient.on('message', (topic, message) => {
+    console.log(message.toString())
+    if(topic === bedroomLampStateTopic) {
+      bedroomLampState = message.toString();
+    }
+  });
+};
